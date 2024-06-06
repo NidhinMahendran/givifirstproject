@@ -81,7 +81,6 @@ data = {'Channel ID': issue_list,
     }
 df = pd.DataFrame(data)
 df.insert(0, 'S.NO', id_values)
-df = df.sort_values(by=['Status', 'ID'], ascending=[False, False])
 
 ## Create DataFrame
 if 'df' not in st.session_state:
