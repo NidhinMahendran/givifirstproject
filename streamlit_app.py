@@ -42,8 +42,7 @@ def cache_storage(json):
         st.session_state.channel_df = pd.concat([st.session_state.channel_df, temp_df], ignore_index=True)
         
         response_dict = {
-            'index': str(json['items'][0]['snippet']['channelId']),
-            'response': json
+            str(json['items'][0]['snippet']['channelId']): json
         }
         
         st.session_state.json_responses.append(response_dict)
