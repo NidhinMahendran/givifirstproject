@@ -34,7 +34,7 @@ def cache_storage(json, index, channel_df):
     }
     temp_df = pd.DataFrame(data)
     if len(temp_df) > 0:
-        df = pd.merge(channel_df, temp_df, on='key', how='inner')
+        df = pd.merge(channel_df, temp_df)
     else:
         df = pd.concat([channel_df, temp_df]).sort_values(by=['S.NO'], ascending=[False])
     st.write(f'dataframe : {df}')
