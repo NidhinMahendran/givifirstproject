@@ -1,8 +1,6 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-import altair as alt
-from datetime import datetime, timedelta
 from googleapiclient.discovery import build
 
 api_key = 'AIzaSyDr8ByPJOb0Q5I3ZLB66-PWjW-FSR3o2oU'
@@ -20,33 +18,24 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Generate data
-## Set seed for reproducibility
-np.random.seed(42)
+# Initialize index and dataframe outside the function
+if 'index' not in st.session_state:
+    st.session_state.index = 1
 
+if 'channel_df' not in st.session_state:
+    st.session_state.channel_df = pd.DataFrame(columns=['S.NO', 'Channel ID', 'Channel Name', 'Channel description'])
 
-def cache_storage(json, index, df):
+def cache_storage(json):
     data = {
-        'S.NO': [index],
+        'S.NO': [st.session_state.index],
         'Channel ID': [json['items'][0]['snippet']['channelId']],
         'Channel Name': [json['items'][0]['snippet']['channelTitle']],
         'Channel description': [json['items'][0]['snippet']['description']]
     }
     temp_df = pd.DataFrame(data)
-    # Assuming 'S.NO' is the key column for merging
-    if 'S.NO' in df.columns:
-        if len(df) > 0:
-            channel_df = pd.merge(df, temp_df, on='S.NO', how='outer')
-        else:
-            channel_df = pd.concat([df, temp_df], ignore_index=True)
-    else:
-        channel_df = pd.concat([df, temp_df], ignore_index=True)
+    st.session_state.channel_df = pd.concat([st.session_state.channel_df, temp_df], ignore_index=True)
+    st.session_state.index += 1
 
-    st.write(f'dataframe : {channel_df}')
-    index += 1
-
-
-## Function to get channel details
 def get_youtube_data(query, max_results=10):
     request = youtube.search().list(
         q=query,
@@ -55,10 +44,6 @@ def get_youtube_data(query, max_results=10):
     )
     response = request.execute()
     return response
-
-# Initialize index and dataframe outside the function
-index = 0
-channel_df = pd.DataFrame(columns=['S.NO', 'Channel ID', 'Channel Name', 'Channel description'])
 
 # Tabs for app layout
 tabs = st.tabs(['➕ Add New Channel', '📋 Collected Channels List', '📊 Channel Performance Analytics'])
@@ -71,13 +56,13 @@ with tabs[0]:
         if submit:
             if channel_name:
                 get_channeldetails = get_youtube_data(channel_name)
-                cache_storage(get_channeldetails, index, channel_df)
-                st.write(f'channel details : {channel_name}')
+                cache_storage(get_channeldetails)
+                st.success(f'Channel details for "{channel_name}" added.')
             else:
-                st.write("Channel Name: Not provided")
+                st.error("Channel Name: Not provided")
 
 with tabs[1]:
     st.write('Collected Channels List')
-    st.dataframe(channel_df)
+    st.dataframe(st.session_state.channel_df)
 
 # You can add code for 'Channel Performance Analytics' in tabs[2] as needed
