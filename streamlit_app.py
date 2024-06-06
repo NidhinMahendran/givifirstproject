@@ -87,10 +87,6 @@ df = df.sort_values(by=['Status', 'ID'], ascending=[False, False])
 if 'df' not in st.session_state:
     st.session_state.df = df
 
-# Sort dataframe
-def sort_df():
-    st.session_state.df = edited_df.copy().sort_values(by=['Status', 'ID'], ascending=[False, False])
-
 
 # Tabs for app layout
 tabs = st.tabs(['➕ Add New Channel', '📋 Collected Channels List', '📊 Channel Performance Analytics'])
@@ -159,7 +155,6 @@ with tabs[2]:
                                             required=True,
                                             ),
                              })
-  st.button('🔄 Sort DataFrame by the Status column', on_click=sort_df)
   
   # Status plot
   st.subheader('Support Ticket Analytics')
