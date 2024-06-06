@@ -46,13 +46,11 @@ with tabs[0]:
 
         if submit:
             if channel_name:
-                st.write(f"Channel Name: {channel_name}")
+                get_channeldetails = get_youtube_data(channel_name)            
+                st.write(f'channel details : {get_channeldetails}')
             else:
                 st.write("Channel Name: Not provided")
                 
-            get_channeldetails = get_youtube_data(channel_name)
-            
-            print(f'channel details : {get_channeldetails}')
             
             today_date = datetime.now().strftime('%Y-%m-%d')
             df2 = pd.DataFrame([{
