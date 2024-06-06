@@ -44,24 +44,24 @@ with tabs[0]:
         channel_name = st.text_input('Channel Name')
         submit = st.form_submit_button('Submit')
 
-    if submit:
-        if channel_name:
-            st.write(f"Channel Name: {channel_name}")
-        else:
-            st.write("Channel Name: Not provided")
+        if submit:
+            if channel_name:
+                st.write(f"Channel Name: {channel_name}")
+            else:
+                st.write("Channel Name: Not provided")
+                
+            get_channeldetails = get_youtube_data(channel_name)
             
-        get_channeldetails = get_youtube_data(channel_name)
-        
-        print(f'channel details : {get_channeldetails}')
-        
-        today_date = datetime.now().strftime('%Y-%m-%d')
-        df2 = pd.DataFrame([{
-                            'channel_name': channel_name,
-                            'Date Submitted': today_date
-                            }])
-        st.write('')
-        st.dataframe(df2, use_container_width=True, hide_index=True)
-        st.session_state.df = pd.concat([st.session_state.df, df2], axis=0)
+            print(f'channel details : {get_channeldetails}')
+            
+            today_date = datetime.now().strftime('%Y-%m-%d')
+            df2 = pd.DataFrame([{
+                                'channel_name': channel_name,
+                                'Date Submitted': today_date
+                                }])
+            st.write('')
+            st.dataframe(df2, use_container_width=True, hide_index=True)
+            st.session_state.df = pd.concat([st.session_state.df, df2], axis=0)
         
 with tabs[1]:
   with st.form('addition'):
