@@ -25,7 +25,7 @@ st.markdown(
 np.random.seed(42)
 
 
-def cache_storage(json, index, df):
+def cache_storage(json, index, channel_df):
     data = {
         'S.NO': [index],
         'Channel ID': [json['items'][0]['snippet']['channelId']],
@@ -34,12 +34,11 @@ def cache_storage(json, index, df):
     }
     temp_df = pd.DataFrame(data)
     if len(temp_df) > 0:
-        channel_df = pd.merge(df, temp_df, on='key', how='inner')
+        df = pd.merge(channel_df, temp_df, on='key', how='inner')
     else:
-        channel_df = pd.concat([df, temp_df]).sort_values(by=['S.NO'], ascending=[False])
+        df = pd.concat([channel_df, temp_df]).sort_values(by=['S.NO'], ascending=[False])
     st.write(f'dataframe : {df}')
     index += 1
-    return index, channel_df
 
 
 ## Function to get channel details
@@ -54,7 +53,7 @@ def get_youtube_data(query, max_results=10):
 
 # Initialize index and dataframe outside the function
 index = 0
-df = pd.DataFrame(columns=['S.NO', 'Channel ID', 'Channel Name', 'Channel description'])
+channel_df = pd.DataFrame(columns=['S.NO', 'Channel ID', 'Channel Name', 'Channel description'])
 
 # Tabs for app layout
 tabs = st.tabs(['➕ Add New Channel', '📋 Collected Channels List', '📊 Channel Performance Analytics'])
@@ -67,7 +66,7 @@ with tabs[0]:
         if submit:
             if channel_name:
                 get_channeldetails = get_youtube_data(channel_name)
-                index, channel_df = cache_storage(get_channeldetails, index, df)
+                cache_storage(get_channeldetails, index, channel_df)
                 st.write(f'channel details : {channel_name}')
             else:
                 st.write("Channel Name: Not provided")
