@@ -25,7 +25,7 @@ st.markdown(
 np.random.seed(42)
 
 
-def cache_storage(json, index, channel_df):
+def cache_storage(json, index, df):
     data = {
         'S.NO': [index],
         'Channel ID': [json['items'][0]['snippet']['channelId']],
@@ -34,15 +34,15 @@ def cache_storage(json, index, channel_df):
     }
     temp_df = pd.DataFrame(data)
     # Assuming 'S.NO' is the key column for merging
-    if 'S.NO' in channel_df.columns:
-        if len(channel_df) > 0:
-            df = pd.merge(channel_df, temp_df, on='S.NO', how='outer')
+    if 'S.NO' in df.columns:
+        if len(df) > 0:
+            channel_df = pd.merge(df, temp_df, on='S.NO', how='outer')
         else:
-            df = pd.concat([channel_df, temp_df], ignore_index=True)
+            channel_df = pd.concat([df, temp_df], ignore_index=True)
     else:
-        df = pd.concat([channel_df, temp_df], ignore_index=True)
+        channel_df = pd.concat([df, temp_df], ignore_index=True)
 
-    st.write(f'dataframe : {df}')
+    st.write(f'dataframe : {channel_df}')
     index += 1
 
 
