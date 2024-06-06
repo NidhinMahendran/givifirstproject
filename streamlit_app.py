@@ -5,9 +5,17 @@ import altair as alt
 from datetime import datetime, timedelta
 
 # Page title
-st.set_page_config(page_title='Support Ticket Workflow', page_icon='🎫')
-st.title('🎫 Support Ticket Workflow')
-st.info('To write a ticket, fill out the form below. Check status or review ticketing analytics using the tabs below.')
+st.set_page_config(page_title='YouTube Data Harvesting & Warehousing', page_icon='https://img.icons8.com/ios-filled/50/youtuber.png')
+st.markdown(
+    """
+    <h1>
+        <img src="https://img.icons8.com/ios-filled/50/youtuber.png" width="30" style="vertical-align: middle;"> 
+        YouTube Data Harvesting & Warehousing
+    </h1>
+    """, 
+    unsafe_allow_html=True
+)
+st.info('To view give youtube channel, fill out the below.')
 
 
 # Generate data
