@@ -33,10 +33,15 @@ def cache_storage(json, index, channel_df):
         'Channel description': [json['items'][0]['snippet']['description']]
     }
     temp_df = pd.DataFrame(data)
-    if len(temp_df) > 0:
-        df = pd.merge(channel_df, temp_df)
+    # Assuming 'S.NO' is the key column for merging
+    if 'S.NO' in channel_df.columns:
+        if len(channel_df) > 0:
+            df = pd.merge(channel_df, temp_df, on='S.NO', how='outer')
+        else:
+            df = pd.concat([channel_df, temp_df], ignore_index=True)
     else:
-        df = pd.concat([channel_df, temp_df]).sort_values(by=['S.NO'], ascending=[False])
+        df = pd.concat([channel_df, temp_df], ignore_index=True)
+
     st.write(f'dataframe : {df}')
     index += 1
 
