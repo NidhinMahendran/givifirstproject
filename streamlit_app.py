@@ -3,6 +3,9 @@ import numpy as np
 import pandas as pd
 import altair as alt
 from datetime import datetime, timedelta
+from googleapiclient.discovery import build
+api_key = 'AIzaSyDr8ByPJOb0Q5I3ZLB66-PWjW-FSR3o2oU'
+youtube = build('youtube', 'v3', developerKey=api_key)
 
 # Page title
 st.set_page_config(page_title='YouTube Data Harvesting & Warehousing', page_icon='https://img.icons8.com/ios-filled/50/youtuber.png')
@@ -20,6 +23,18 @@ st.markdown(
 # Generate data
 ## Set seed for reproducibility
 np.random.seed(42)
+
+
+## Function to get channel details
+def get_youtube_data(query, max_results=10):
+    request = youtube.search().list(
+        q=query,
+        part='snippet',
+        maxResults=max_results
+    )
+    response = request.execute()
+    return response
+
 
 ## Function to generate a random issue description
 def generate_issue():
@@ -50,7 +65,7 @@ def generate_issue():
 ## Function to generate random dates
 start_date = datetime(2023, 6, 1)
 end_date = datetime(2023, 12, 20)
-id_values = ['TICKET-{}'.format(i) for i in range(1000, 1100)]
+id_values = ['{}'.format(i) for i in range(1000, 1100)]
 issue_list = [generate_issue() for _ in range(100)]
 
 
@@ -59,13 +74,13 @@ def generate_random_dates(start_date, end_date, id_values):
     return np.random.choice(date_range, size=len(id_values), replace=False)
 
 ## Generate 100 rows of data
-data = {'Issue': issue_list,
-        'Status': np.random.choice(['Open', 'In Progress', 'Closed'], size=100),
+data = {'Channel ID': issue_list,
+        'Channel Name': np.random.choice(['Open', 'In Progress', 'Closed'], size=100),
         'Priority': np.random.choice(['High', 'Medium', 'Low'], size=100),
         'Date Submitted': generate_random_dates(start_date, end_date, id_values)
     }
 df = pd.DataFrame(data)
-df.insert(0, 'ID', id_values)
+df.insert(0, 'S.NO', id_values)
 df = df.sort_values(by=['Status', 'ID'], ascending=[False, False])
 
 ## Create DataFrame
@@ -78,14 +93,14 @@ def sort_df():
 
 
 # Tabs for app layout
-tabs = st.tabs(['Enter the channel name', 'Provided Channel Analytics'])
+tabs = st.tabs(['➕ Add New Channel', '📋 Collected Channels List', '📊 Channel Performance Analytics'])
 
 recent_ticket_number = int(max(st.session_state.df.ID).split('-')[1])
 
 with tabs[0]:
-  with st.form('addition'):
-    channel_name = st.text_input('Channel Name')
-    submit = st.form_submit_button('Submit')
+    with st.form('addition'):
+        channel_name = st.text_input('Channel Name')
+        submit = st.form_submit_button('Submit')
 
     if submit:
         if channel_name:
@@ -93,6 +108,10 @@ with tabs[0]:
         else:
             st.write("Channel Name: Not provided")
             
+        get_channeldetails = get_youtube_data(channel_name)
+        
+        print(f'channel details : {get_channeldetails}')
+        
         today_date = datetime.now().strftime('%Y-%m-%d')
         df2 = pd.DataFrame([{'ID': f'TICKET-{recent_ticket_number+1}',
                             'channel_name': channel_name,
@@ -101,8 +120,13 @@ with tabs[0]:
         st.write('')
         st.dataframe(df2, use_container_width=True, hide_index=True)
         st.session_state.df = pd.concat([st.session_state.df, df2], axis=0)
-
+        
 with tabs[1]:
+  with st.form('addition'):
+    channel_name = st.text_input('Channel Name')
+
+
+with tabs[2]:
   status_col = st.columns((3,1))
   with status_col[0]:
       st.subheader('Support Ticket Status')
