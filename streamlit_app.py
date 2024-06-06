@@ -26,23 +26,30 @@ if 'index' not in st.session_state:
 if 'channel_df' not in st.session_state:
     st.session_state.channel_df = pd.DataFrame(columns=['S.NO', 'Channel ID', 'Channel Name', 'Channel Description'])
 
-if 'original_df' not in st.session_state:
-    st.session_state.original_df = pd.DataFrame()
+if 'json_responses' not in st.session_state:
+    st.session_state.json_responses = []
 
 def cache_storage(json):
-    data = {
-        'S.NO': [st.session_state.index],
-        'Channel ID': [json['items'][0]['snippet']['channelId']],
-        'Channel Name': [json['items'][0]['snippet']['channelTitle']],
-        'Channel Description': [json['items'][0]['snippet']['description']]
-    }
-    temp_df = pd.DataFrame(data)
-    temp_original_df = pd.DataFrame(json)
-    
-    st.session_state.channel_df = pd.concat([st.session_state.channel_df, temp_df], ignore_index=True)
-    st.session_state.original_df = pd.concat([st.session_state.original_df, temp_original_df], ignore_index=True)
-    st.session_state.index += 1
-    
+    try:
+        data = {
+            'S.NO': [st.session_state.index],
+            'Channel ID': [json['items'][0]['snippet']['channelId']],
+            'Channel Name': [json['items'][0]['snippet']['channelTitle']],
+            'Channel Description': [json['items'][0]['snippet']['description']]
+        }
+        temp_df = pd.DataFrame(data)
+        
+        st.session_state.channel_df = pd.concat([st.session_state.channel_df, temp_df], ignore_index=True)
+        
+        response_dict = {
+            'index': str(json['items'][0]['snippet']['channelId']),
+            'response': json
+        }
+        
+        st.session_state.json_responses.append(response_dict)
+        st.session_state.index += 1
+    except (IndexError, KeyError) as e:
+        st.error(f"Error processing the response: {e}")
 
 def get_youtube_data(query, max_results=10):
     request = youtube.search().list(
@@ -74,6 +81,6 @@ with tabs[1]:
     st.dataframe(st.session_state.channel_df)
     submit = st.button('Migrate to SQL')
     if submit:
-        st.write(st.session_state.original_df)
+        st.write(st.session_state.json_responses)
 
 # You can add code for 'Channel Performance Analytics' in tabs[2] as needed
