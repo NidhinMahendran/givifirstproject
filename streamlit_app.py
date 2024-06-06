@@ -35,21 +35,35 @@ def get_youtube_data(query, max_results=10):
     return response
 
 # Initialize index and dataframe outside the function
-index = 0
-df = pd.DataFrame(columns=['S.NO', 'Channel ID', 'Channel Name', 'Channel description'])
+if 'index' not in st.session_state:
+    st.session_state.index = 0
 
-def cache_storage(json, index, df):
+if 'df' not in st.session_state:
+    st.session_state.df = pd.DataFrame(columns=['S.NO', 'Channel ID', 'Channel Name', 'Channel Description'])
+
+def add_value_to_dataframe(df, index, channel_id, channel_name, channel_description):
     data = {
         'S.NO': [index],
-        'Channel ID': [json['items'][0]['snippet']['channelId']],
-        'Channel Name': [json['items'][0]['snippet']['channelTitle']],
-        'Channel description': [json['items'][0]['snippet']['description']]
+        'Channel ID': [channel_id],
+        'Channel Name': [channel_name],
+        'Channel Description': [channel_description]
     }
-    temp_df = pd.DataFrame(data)
-    df = pd.concat([df, temp_df]).sort_values(by=['S.NO'], ascending=[False])
-    st.write(f'dataframe : {df}')
-    index += 1
-    return index, df
+    new_df = pd.DataFrame(data)
+    df = pd.concat([df, new_df]).sort_values(by=['S.NO'], ascending=[False])
+    return df
+
+def cache_storage(json, index, df):
+    df = add_value_to_dataframe(
+        df,
+        index,
+        json['items'][0]['snippet']['channelId'],
+        json['items'][0]['snippet']['channelTitle'],
+        json['items'][0]['snippet']['description']
+    )
+
+    # Update the session state
+    st.session_state.df = df
+    st.session_state.index += 1
 
 # Tabs for app layout
 tabs = st.tabs(['➕ Add New Channel', '📋 Collected Channels List', '📊 Channel Performance Analytics'])
@@ -62,13 +76,13 @@ with tabs[0]:
         if submit:
             if channel_name:
                 get_channeldetails = get_youtube_data(channel_name)
-                index, df = cache_storage(get_channeldetails, index, df)
-                st.write(f'channel details : {channel_name}')
+                cache_storage(get_channeldetails, st.session_state.index, st.session_state.df)
+                st.write(f'Channel details added: {channel_name}')
             else:
                 st.write("Channel Name: Not provided")
 
 with tabs[1]:
     st.write('Collected Channels List')
-    st.dataframe(df)
+    st.dataframe(st.session_state.df)
 
 # You can add code for 'Channel Performance Analytics' in tabs[2] as needed
