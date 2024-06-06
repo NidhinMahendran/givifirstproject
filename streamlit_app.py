@@ -49,7 +49,7 @@ def add_value_to_dataframe(df, index, channel_id, channel_name, channel_descript
         'Channel Description': [channel_description]
     }
     new_df = pd.DataFrame(data)
-    df = pd.concat([df, new_df]).sort_values(by=['S.NO'], ascending=[False])
+    df = pd.concat([df, new_df], ignore_index=True).sort_values(by=['S.NO'], ascending=[False])
     return df
 
 def cache_storage(json, index, df):
@@ -69,20 +69,4 @@ def cache_storage(json, index, df):
 tabs = st.tabs(['➕ Add New Channel', '📋 Collected Channels List', '📊 Channel Performance Analytics'])
 
 with tabs[0]:
-    with st.form('addition'):
-        channel_name = st.text_input('Channel Name')
-        submit = st.form_submit_button('Submit')
-
-        if submit:
-            if channel_name:
-                get_channeldetails = get_youtube_data(channel_name)
-                cache_storage(get_channeldetails, st.session_state.index, st.session_state.df)
-                st.write(f'Channel details added: {channel_name}')
-            else:
-                st.write("Channel Name: Not provided")
-
-with tabs[1]:
-    st.write('Collected Channels List')
-    st.dataframe(st.session_state.df)
-
-# You can add code for 'Channel Performance Analytics' in tabs[2] as needed
+    wit
