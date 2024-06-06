@@ -64,5 +64,8 @@ with tabs[0]:
 with tabs[1]:
     st.write('Collected Channels List')
     st.dataframe(st.session_state.channel_df)
+    submit = st.button('Migrate to SQL')
+    if submit:
+        st.write(f'Name: ')
 
 # You can add code for 'Channel Performance Analytics' in tabs[2] as needed
