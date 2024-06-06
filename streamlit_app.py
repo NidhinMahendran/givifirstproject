@@ -63,12 +63,4 @@ with tabs[0]:
             st.dataframe(df2, use_container_width=True, hide_index=True)
             st.session_state.df = pd.concat([st.session_state.df, df2], axis=0)
         
-with tabs[1]:
-  with st.form('addition'):
-    channel_name = st.text_input('Channel Name')
-
-
-with tabs[2]:
-  with st.form('addition'):
-    channel_name = st.text_input('Channel Name')
 
