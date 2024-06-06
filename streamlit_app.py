@@ -4,6 +4,7 @@ import pandas as pd
 import altair as alt
 from datetime import datetime, timedelta
 from googleapiclient.discovery import build
+
 api_key = 'AIzaSyDr8ByPJOb0Q5I3ZLB66-PWjW-FSR3o2oU'
 youtube = build('youtube', 'v3', developerKey=api_key)
 
@@ -23,6 +24,7 @@ st.markdown(
 # Generate data
 ## Set seed for reproducibility
 np.random.seed(42)
+index = 0
 
 
 ## Function to get channel details
@@ -36,6 +38,19 @@ def get_youtube_data(query, max_results=10):
     return response
 
 
+def cache_storage(json):
+    data = {
+            'S.NO': index,
+            'Channel ID': json['items']['snippet']['channelId'],
+            'Channel Name': json['items']['snippet']['channelTitle'],
+            'Channel description': json['items']['snippet']['description']
+        }
+    temp_df = pd.DataFrame(data)
+    df = temp_df.sort_values(by=['S.NO'], ascending=[False, False])
+    st.write(f'dataframe : {df}')
+    index=+1
+
+
 # Tabs for app layout
 tabs = st.tabs(['➕ Add New Channel', '📋 Collected Channels List', '📊 Channel Performance Analytics'])
 
@@ -46,19 +61,10 @@ with tabs[0]:
 
         if submit:
             if channel_name:
-                get_channeldetails = get_youtube_data(channel_name)            
-                st.write(f'channel details : {get_channeldetails}')
+                get_channeldetails = get_youtube_data(channel_name)
+                cache_storage(get_channeldetails)
+                st.write(f'channel details : {channel_name}')
+            
             else:
                 st.write("Channel Name: Not provided")
-                
-            
-            today_date = datetime.now().strftime('%Y-%m-%d')
-            df2 = pd.DataFrame([{
-                                'channel_name': channel_name,
-                                'Date Submitted': today_date
-                                }])
-            st.write('')
-            st.dataframe(df2, use_container_width=True, hide_index=True)
-            st.session_state.df = pd.concat([st.session_state.df, df2], axis=0)
-        
 
