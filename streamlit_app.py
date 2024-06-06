@@ -39,8 +39,6 @@ def get_youtube_data(query, max_results=10):
 # Tabs for app layout
 tabs = st.tabs(['➕ Add New Channel', '📋 Collected Channels List', '📊 Channel Performance Analytics'])
 
-recent_ticket_number = int(max(st.session_state.df.ID).split('-')[1])
-
 with tabs[0]:
     with st.form('addition'):
         channel_name = st.text_input('Channel Name')
@@ -57,7 +55,7 @@ with tabs[0]:
         print(f'channel details : {get_channeldetails}')
         
         today_date = datetime.now().strftime('%Y-%m-%d')
-        df2 = pd.DataFrame([{'ID': f'TICKET-{recent_ticket_number+1}',
+        df2 = pd.DataFrame([{
                             'channel_name': channel_name,
                             'Date Submitted': today_date
                             }])
