@@ -49,7 +49,9 @@ def add_value_to_dataframe(df, index, channel_id, channel_name, channel_descript
         'Channel Description': [channel_description]
     }
     new_df = pd.DataFrame(data)
-    df = pd.concat([df, new_df], ignore_index=True).sort_values(by=['S.NO'], ascending=[False])
+    df = pd.concat([df, new_df], ignore_index=True)
+    df['S.NO'] = df['S.NO'].astype(int)
+    df = df.sort_values(by=['S.NO'], ascending=[False])
     return df
 
 def cache_storage(json, index, df):
