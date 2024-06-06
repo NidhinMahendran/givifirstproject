@@ -24,8 +24,7 @@ if 'index' not in st.session_state:
     st.session_state.index = 1
 
 if 'channel_df' not in st.session_state:
-    st.session_state.channel_df = pd.DataFrame(columns=['Channel ID', 'Channel Name', 'Channel Description'])
-    st.session_state.channel_df.insert(0,'S.NO')
+    st.session_state.channel_df = pd.DataFrame(columns=['S.NO', 'Channel ID', 'Channel Name', 'Channel Description'])
 
 if 'json_responses' not in st.session_state:
     st.session_state.json_responses = []
@@ -33,6 +32,7 @@ if 'json_responses' not in st.session_state:
 def cache_storage(json):
     try:
         data = {
+            'S.NO': [st.session_state.index],
             'Channel ID': [json['items'][0]['snippet']['channelId']],
             'Channel Name': [json['items'][0]['snippet']['channelTitle']],
             'Channel Description': [json['items'][0]['snippet']['description']]
@@ -46,6 +46,7 @@ def cache_storage(json):
         }
         
         st.session_state.json_responses.append(response_dict)
+        st.session_state.index += 1
     except (IndexError, KeyError) as e:
         st.error(f"Error processing the response: {e}")
 
