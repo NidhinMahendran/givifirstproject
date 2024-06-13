@@ -2,14 +2,6 @@ import psycopg2
 from psycopg2 import sql
 import subprocess
 
-# Ensure PostgreSQL service is running
-def start_postgresql_service():
-    try:
-        subprocess.run(['sudo', 'service', 'postgresql', 'start'], check=True)
-        print("PostgreSQL service started successfully")
-    except subprocess.CalledProcessError as e:
-        print(f"Error starting PostgreSQL service: {e}")
-
 def create_connection(dbname, user, password, host='localhost', port='5432'):
     try:
         conn = psycopg2.connect(dbname=dbname, user=user, password=password, host=host, port=port)
@@ -48,8 +40,6 @@ def create_table(conn, table_name, table_schema):
 
 if __name__ == "__main__":
     # Start PostgreSQL service
-    start_postgresql_service()
-
     default_db_conn = create_connection('postgres', 'guviuser', 'password')
 
     if default_db_conn:
