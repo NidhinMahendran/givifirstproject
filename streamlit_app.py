@@ -10,7 +10,7 @@ youtube = build('youtube', 'v3', developerKey=api_key)
 
 connection_string = "mongodb+srv://nidhinvijay710:q9i1Noxu4bbwqWyx@cluster0.xwlhqut.mongodb.net/"
 client = MongoClient(connection_string)
-db = client.guviproject
+db = client.get_database()
 
 # Page title
 st.set_page_config(page_title='YouTube Data Harvesting & Warehousing', page_icon='https://img.icons8.com/ios-filled/50/youtuber.png')
@@ -76,7 +76,6 @@ with tabs[0]:
         submit = st.form_submit_button('Submit')
 
         if submit:
-            st.write(db.list_collection_names())
             if channel_name:
                 get_channeldetails = get_youtube_data(channel_name)                
                 cache_storage(get_channeldetails)
@@ -90,5 +89,14 @@ with tabs[1]:
     submit = st.button('Migrate to SQL')
     if submit:
         st.write(st.session_state.json_responses)
+        
+        
+with tabs[2]:
+    try:
+        collection_names = db.list_collection_names()
+        st.write("Collections:", collection_names)
+        st.success("Connected to MongoDB successfully!")
+    except Exception as e:
+        st.error(f"Error connecting to MongoDB: {e}")
 
 # You can add code for 'Channel Performance Analytics' in tabs[2] as needed
