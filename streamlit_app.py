@@ -3,15 +3,19 @@ import numpy as np
 import pandas as pd
 from pymongo import MongoClient
 from googleapiclient.discovery import build
+import ssl
+import dns.resolver
 
 # API Key
 api_key = 'AIzaSyDr8ByPJOb0Q5I3ZLB66-PWjW-FSR3o2oU'
 youtube = build('youtube', 'v3', developerKey=api_key)
 
 connection_string = "mongodb+srv://nidhinvijay710:q9i1Noxu4bbwqWyx@cluster0.xwlhqut.mongodb.net/"
-client = MongoClient(connection_string)
+resolver = dns.resolver.Resolver()
+resolver.nameservers = ['8.8.8.8', '8.8.4.4']
+client = MongoClient(connection_string, ssl=True, ssl_cert_reqs=ssl.CERT_NONE, dns_resolver=resolver)
 db = client.get_database("guviproject")
-
+ 
 # Page title
 st.set_page_config(page_title='YouTube Data Harvesting & Warehousing', page_icon='https://img.icons8.com/ios-filled/50/youtuber.png')
 st.markdown(
