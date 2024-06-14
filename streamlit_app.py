@@ -9,9 +9,8 @@ from googleapiclient.discovery import build
 api_key = 'AIzaSyDr8ByPJOb0Q5I3ZLB66-PWjW-FSR3o2oU'
 youtube = build('youtube', 'v3', developerKey=api_key)
 
-
-uri = "mongodb+srv://nidhinvijay710:q9i1Noxu4bbwqWyx@cluster0.xwlhqut.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0&tls=true&tlsAllowInvalidCertificates=true"
-db = MongoClient(uri, server_api=ServerApi('1'))
+uri = "mongodb+srv://nidhinvijay710:q9i1Noxu4bbwqWyx@cluster0.xwlhqut.mongodb.net/?retryWrites=true&w=majority"
+db = MongoClient(uri, ssl=True, ssl_cert_reqs='CERT_NONE', server_api=ServerApi('1'))
 
  
 # Page title
