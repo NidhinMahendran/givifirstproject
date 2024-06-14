@@ -1,5 +1,4 @@
 streamlit>=1.26.0
 google-api-python-client==2.132.0
 SQLAlchemy
-pymongo>=4.0.0
-dnspython>=2.0.0
+psycopg2

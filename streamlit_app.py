@@ -1,8 +1,7 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
+import psycopg2
 from googleapiclient.discovery import build
 
 # API Key
@@ -10,8 +9,14 @@ api_key = 'AIzaSyDr8ByPJOb0Q5I3ZLB66-PWjW-FSR3o2oU'
 youtube = build('youtube', 'v3', developerKey=api_key)
 
 
-uri = "mongodb+srv://nidhinvijay710:q9i1Noxu4bbwqWyx@cluster0.xwlhqut.mongodb.net/?retryWrites=true&w=majority"
-db = MongoClient(uri, server_api=ServerApi('1'), connectTimeoutMS=30000, socketTimeoutMS=30000)
+# Establish a connection to the database
+conn = psycopg2.connect(
+    host='localhost',
+    port=3306,
+    dbname='guvi_youtube_project',
+    user='root',
+    password='password'
+)
 
 
 # Page title
@@ -95,7 +100,14 @@ with tabs[1]:
         
 with tabs[2]:
     try:
-        db.admin.command('ping')
-        st.write("Pinged your deployment. You successfully connected to MongoDB!")
+        cur = conn.cursor()
+        cur.execute("SELECT version();")
+        db_version = cur.fetchone()
+        st.success("Database connection successful!")
+        st.success("PostgreSQL Database Version:", db_version)
+
+        cur.close()
+        conn.close()
+
     except Exception as e:
-        st.error(e)
+        st.error("Error connecting to the database:", e)
