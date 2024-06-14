@@ -10,7 +10,7 @@ youtube = build('youtube', 'v3', developerKey=api_key)
 
 connection_string = "mongodb+srv://nidhinvijay710:q9i1Noxu4bbwqWyx@cluster0.xwlhqut.mongodb.net/"
 client = MongoClient(connection_string)
-db = client.get_database()
+db = client.get_database("guviproject")
 
 # Page title
 st.set_page_config(page_title='YouTube Data Harvesting & Warehousing', page_icon='https://img.icons8.com/ios-filled/50/youtuber.png')
