@@ -1,6 +1,7 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
+from pymongo import MongoClient
 from googleapiclient.discovery import build
 
 # API Key
@@ -18,6 +19,14 @@ st.markdown(
     """, 
     unsafe_allow_html=True
 )
+
+
+connection_string = "mongodb+srv://nidhinvijay710:q9i1Noxu4bbwqWyx@cluster0.xwlhqut.mongodb.net/"
+client = MongoClient(connection_string)
+
+db = client.guviproject
+print(db.list_collection_names())
+
 
 # Initialize session state variables
 if 'index' not in st.session_state:
