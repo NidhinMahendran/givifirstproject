@@ -10,14 +10,35 @@ youtube = build('youtube', 'v3', developerKey=api_key)
 
 
 # Establish a connection to the database
-conn = psycopg2.connect(
-    host='localhost',
-    port=3306,
-    dbname='guvi_youtube_project',
-    user='root',
-    password='password'
-)
 
+def check_db_connection():
+    try:
+        # Establish a connection to the database
+        conn = psycopg2.connect(
+            host='localhost',
+            port=3306,
+            dbname='guvi_youtube_project',
+            user='root',
+            password='password'
+        )
+
+        # Create a cursor object
+        cur = conn.cursor()
+        
+        # Execute a simple SQL query to test the connection
+        cur.execute("SELECT version();")
+        
+        # Fetch and print the result of the query
+        db_version = cur.fetchone()
+        st.write("Database connection successful!")
+        st.write("PostgreSQL Database Version:", db_version)
+
+        # Close the cursor and connection
+        cur.close()
+        conn.close()
+
+    except Exception as e:
+        st.write("Error connecting to the database:", e)
 
 # Page title
 st.set_page_config(page_title='YouTube Data Harvesting & Warehousing', page_icon='https://img.icons8.com/ios-filled/50/youtuber.png')
@@ -99,15 +120,4 @@ with tabs[1]:
         
         
 with tabs[2]:
-    try:
-        cur = conn.cursor()
-        cur.execute("SELECT version();")
-        db_version = cur.fetchone()
-        st.success("Database connection successful!")
-        st.success("PostgreSQL Database Version:", db_version)
-
-        cur.close()
-        conn.close()
-
-    except Exception as e:
-        st.error("Error connecting to the database:", e)
+    check_db_connection()
