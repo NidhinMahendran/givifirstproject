@@ -8,6 +8,10 @@ from googleapiclient.discovery import build
 api_key = 'AIzaSyDr8ByPJOb0Q5I3ZLB66-PWjW-FSR3o2oU'
 youtube = build('youtube', 'v3', developerKey=api_key)
 
+connection_string = "mongodb+srv://nidhinvijay710:q9i1Noxu4bbwqWyx@cluster0.xwlhqut.mongodb.net/"
+client = MongoClient(connection_string)
+db = client.guviproject
+
 # Page title
 st.set_page_config(page_title='YouTube Data Harvesting & Warehousing', page_icon='https://img.icons8.com/ios-filled/50/youtuber.png')
 st.markdown(
@@ -21,11 +25,6 @@ st.markdown(
 )
 
 
-connection_string = "mongodb+srv://nidhinvijay710:q9i1Noxu4bbwqWyx@cluster0.xwlhqut.mongodb.net/"
-client = MongoClient(connection_string)
-
-db = client.guviproject
-print(db.list_collection_names())
 
 
 # Initialize session state variables
@@ -77,6 +76,7 @@ with tabs[0]:
         submit = st.form_submit_button('Submit')
 
         if submit:
+            st.write(db.list_collection_names())
             if channel_name:
                 get_channeldetails = get_youtube_data(channel_name)                
                 cache_storage(get_channeldetails)
