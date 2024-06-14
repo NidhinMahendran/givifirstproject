@@ -1,18 +1,18 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-from pymongo import MongoClient
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
 from googleapiclient.discovery import build
-import ssl
-import dns.resolver
 
 # API Key
 api_key = 'AIzaSyDr8ByPJOb0Q5I3ZLB66-PWjW-FSR3o2oU'
 youtube = build('youtube', 'v3', developerKey=api_key)
 
-connection_string = "mongodb+srv://nidhinvijay710:q9i1Noxu4bbwqWyx@cluster0.xwlhqut.mongodb.net/"
-client = MongoClient(connection_string, ssl=True, ssl_cert_reqs=ssl.CERT_NONE)
-db = client.get_database("guviproject")
+
+uri = "mongodb+srv://nidhinvijay710:q9i1Noxu4bbwqWyx@cluster0.xwlhqut.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+db = MongoClient(uri, server_api=ServerApi('1'))
+
  
 # Page title
 st.set_page_config(page_title='YouTube Data Harvesting & Warehousing', page_icon='https://img.icons8.com/ios-filled/50/youtuber.png')
@@ -95,10 +95,7 @@ with tabs[1]:
         
 with tabs[2]:
     try:
-        collection_names = db.list_collection_names()
-        st.write("Collections:", collection_names)
-        st.success("Connected to MongoDB successfully!")
+        db.admin.command('ping')
+        st.write("Pinged your deployment. You successfully connected to MongoDB!")
     except Exception as e:
-        st.error(f"Error connecting to MongoDB: {e}")
-
-# You can add code for 'Channel Performance Analytics' in tabs[2] as needed
+        st.error(e)
