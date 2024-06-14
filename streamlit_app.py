@@ -11,9 +11,7 @@ api_key = 'AIzaSyDr8ByPJOb0Q5I3ZLB66-PWjW-FSR3o2oU'
 youtube = build('youtube', 'v3', developerKey=api_key)
 
 connection_string = "mongodb+srv://nidhinvijay710:q9i1Noxu4bbwqWyx@cluster0.xwlhqut.mongodb.net/"
-resolver = dns.resolver.Resolver()
-resolver.nameservers = ['8.8.8.8', '8.8.4.4']
-client = MongoClient(connection_string, ssl=True, ssl_cert_reqs=ssl.CERT_NONE, dns_resolver=resolver)
+client = MongoClient(connection_string, ssl=True, ssl_cert_reqs=ssl.CERT_NONE)
 db = client.get_database("guviproject")
  
 # Page title
