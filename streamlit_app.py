@@ -1,11 +1,10 @@
 import streamlit as st
-import numpy as np
 import pandas as pd
-import psycopg2
 from googleapiclient.discovery import build
 from sqlalchemy import create_engine, Column, String, Integer, Text, DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy.exc import OperationalError
 
 # API Key
 api_key = 'AIzaSyDr8ByPJOb0Q5I3ZLB66-PWjW-FSR3o2oU'
@@ -61,10 +60,21 @@ class Comment(Base):
 # Database connection
 DATABASE_URL = "postgresql://user:password@localhost:5432/guvi_project"
 
-engine = create_engine(DATABASE_URL)
-Session = sessionmaker(bind=engine)
-session = Session()
+def check_db_connection():
+    try:
+        engine = create_engine(DATABASE_URL)
+        engine.connect()
+        Base.metadata.create_all(engine)
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        return session
+    except OperationalError as e:
+        st.error(f"Database connection failed: {e}")
+        return None
 
+session = check_db_connection()
+if not session:
+    st.stop()
 
 # Page title
 st.set_page_config(page_title='YouTube Data Harvesting & Warehousing', page_icon='https://img.icons8.com/ios-filled/50/youtuber.png')
@@ -78,9 +88,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-
-
-
 # Initialize session state variables
 if 'index' not in st.session_state:
     st.session_state.index = 1
@@ -93,22 +100,39 @@ if 'json_responses' not in st.session_state:
 
 def cache_storage(json):
     try:
+        channel_id = json['items'][0]['snippet']['channelId']
+        channel_name = json['items'][0]['snippet']['channelTitle']
+        channel_description = json['items'][0]['snippet']['description']
+        
         data = {
             'S.NO': [st.session_state.index],
-            'Channel ID': [json['items'][0]['snippet']['channelId']],
-            'Channel Name': [json['items'][0]['snippet']['channelTitle']],
-            'Channel Description': [json['items'][0]['snippet']['description']]
+            'Channel ID': [channel_id],
+            'Channel Name': [channel_name],
+            'Channel Description': [channel_description]
         }
         temp_df = pd.DataFrame(data)
         
         st.session_state.channel_df = pd.concat([st.session_state.channel_df, temp_df], ignore_index=True)
         
         response_dict = {
-            str(json['items'][0]['snippet']['channelId']): json
+            str(channel_id): json
         }
         
         st.session_state.json_responses.append(response_dict)
         st.session_state.index += 1
+        
+        # Add to SQL database
+        new_channel = Channel(
+            channel_id=channel_id,
+            channel_name=channel_name,
+            channel_description=channel_description,
+            channel_type='Unknown',  # Assuming this field is not available in the API response
+            channel_views=0,  # Assuming this field is not available in the API response
+            channel_status='Active'  # Assuming a default status
+        )
+        session.add(new_channel)
+        session.commit()
+        
     except (IndexError, KeyError) as e:
         st.error(f"Error processing the response: {e}")
 
@@ -142,6 +166,9 @@ with tabs[1]:
     st.dataframe(st.session_state.channel_df)
     submit = st.button('Migrate to SQL')
     if submit:
-        st.write(st.session_state.json_responses)
-        
-        
+        st.write("Migrating data to SQL...")
+        for response in st.session_state.json_responses:
+            channel_id = list(response.keys())[0]
+            json = response[channel_id]
+            cache_storage(json)
+        st.success("Data migrated successfully.")
