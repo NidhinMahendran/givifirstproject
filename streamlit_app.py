@@ -3,42 +3,68 @@ import numpy as np
 import pandas as pd
 import psycopg2
 from googleapiclient.discovery import build
+from sqlalchemy import create_engine, Column, String, Integer, Text, DateTime, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship, sessionmaker
 
 # API Key
 api_key = 'AIzaSyDr8ByPJOb0Q5I3ZLB66-PWjW-FSR3o2oU'
 youtube = build('youtube', 'v3', developerKey=api_key)
 
+Base = declarative_base()
 
-# Establish a connection to the database
+class Channel(Base):
+    __tablename__ = 'channel'
+    channel_id = Column(String(255), primary_key=True)
+    channel_name = Column(String(255))
+    channel_type = Column(String(255))
+    channel_views = Column(Integer)
+    channel_description = Column(Text)
+    channel_status = Column(String(255))
+    playlists = relationship("Playlist", back_populates="channel")
 
-def check_db_connection():
-    try:
-        # Establish a connection to the database
-        conn = psycopg2.connect(
-            host='localhost',
-            port=3306,
-            dbname='guvi_youtube_project',
-            user='root',
-            password='password'
-        )
+class Playlist(Base):
+    __tablename__ = 'playlist'
+    playlist_id = Column(String(255), primary_key=True)
+    channel_id = Column(String(255), ForeignKey('channel.channel_id'))
+    playlist_name = Column(String(255))
+    channel = relationship("Channel", back_populates="playlists")
+    videos = relationship("Video", back_populates="playlist")
 
-        # Create a cursor object
-        cur = conn.cursor()
-        
-        # Execute a simple SQL query to test the connection
-        cur.execute("SELECT version();")
-        
-        # Fetch and print the result of the query
-        db_version = cur.fetchone()
-        st.write("Database connection successful!")
-        st.write("PostgreSQL Database Version:", db_version)
+class Video(Base):
+    __tablename__ = 'video'
+    video_id = Column(String(255), primary_key=True)
+    playlist_id = Column(String(255), ForeignKey('playlist.playlist_id'))
+    video_name = Column(String(255))
+    video_description = Column(Text)
+    published_date = Column(DateTime(timezone=True))
+    view_count = Column(Integer)
+    like_count = Column(Integer)
+    dislike_count = Column(Integer)
+    favorite_count = Column(Integer)
+    comment_count = Column(Integer)
+    duration = Column(Integer)
+    thumbnail = Column(String(255))
+    caption_status = Column(String(255))
+    playlist = relationship("Playlist", back_populates="videos")
+    comments = relationship("Comment", back_populates="video")
 
-        # Close the cursor and connection
-        cur.close()
-        conn.close()
+class Comment(Base):
+    __tablename__ = 'comment'
+    comment_id = Column(String(255), primary_key=True)
+    video_id = Column(String(255), ForeignKey('video.video_id'))
+    comment_text = Column(Text)
+    comment_author = Column(String(255))
+    comment_published_date = Column(DateTime(timezone=True))
+    video = relationship("Video", back_populates="comments")
 
-    except Exception as e:
-        st.write("Error connecting to the database:", e)
+# Database connection
+DATABASE_URL = "postgresql://user:password@localhost:5432/guvi_project"
+
+engine = create_engine(DATABASE_URL)
+Session = sessionmaker(bind=engine)
+session = Session()
+
 
 # Page title
 st.set_page_config(page_title='YouTube Data Harvesting & Warehousing', page_icon='https://img.icons8.com/ios-filled/50/youtuber.png')
@@ -119,5 +145,3 @@ with tabs[1]:
         st.write(st.session_state.json_responses)
         
         
-with tabs[2]:
-    check_db_connection()
