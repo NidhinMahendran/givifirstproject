@@ -58,23 +58,23 @@ class Comment(Base):
     video = relationship("Video", back_populates="comments")
 
 # Database connection
-DATABASE_URL = "postgresql://user:password@localhost:5432/guvi_project"
+# DATABASE_URL = "postgresql://user:password@localhost:5432/guvi_project"
 
-def check_db_connection():
-    try:
-        engine = create_engine(DATABASE_URL)
-        engine.connect()
-        Base.metadata.create_all(engine)
-        Session = sessionmaker(bind=engine)
-        session = Session()
-        return session
-    except OperationalError as e:
-        st.error(f"Database connection failed: {e}")
-        return None
+# def check_db_connection():
+#     try:
+#         engine = create_engine(DATABASE_URL)
+#         engine.connect()
+#         Base.metadata.create_all(engine)
+#         Session = sessionmaker(bind=engine)
+#         session = Session()
+#         return session
+#     except OperationalError as e:
+#         st.error(f"Database connection failed: {e}")
+#         return None
 
-session = check_db_connection()
-if not session:
-    st.stop()
+# session = check_db_connection()
+# if not session:
+#     st.stop()
 
 # Page title
 st.set_page_config(page_title='YouTube Data Harvesting & Warehousing', page_icon='https://img.icons8.com/ios-filled/50/youtuber.png')
@@ -145,6 +145,21 @@ def get_youtube_data(query, max_results=10):
     response = request.execute()
     return response
 
+def fetch_channels():
+    channels = session.query(Channel).all()
+    return pd.DataFrame([(channel.channel_id, channel.channel_name, channel.channel_description) for channel in channels], 
+                        columns=['Channel ID', 'Channel Name', 'Channel Description'])
+
+def fetch_videos():
+    videos = session.query(Video).all()
+    return pd.DataFrame([(video.video_id, video.video_name, video.video_description, video.published_date, video.view_count, video.like_count, video.dislike_count, video.favorite_count, video.comment_count, video.duration, video.thumbnail, video.caption_status) for video in videos], 
+                        columns=['Video ID', 'Video Name', 'Video Description', 'Published Date', 'View Count', 'Like Count', 'Dislike Count', 'Favorite Count', 'Comment Count', 'Duration', 'Thumbnail', 'Caption Status'])
+
+def fetch_comments():
+    comments = session.query(Comment).all()
+    return pd.DataFrame([(comment.comment_id, comment.video_id, comment.comment_text, comment.comment_author, comment.comment_published_date) for comment in comments], 
+                        columns=['Comment ID', 'Video ID', 'Comment Text', 'Comment Author', 'Comment Published Date'])
+
 # Tabs for app layout
 tabs = st.tabs(['➕ Add New Channel', '📋 Collected Channels List', '📊 Channel Performance Analytics'])
 
@@ -172,3 +187,16 @@ with tabs[1]:
             json = response[channel_id]
             cache_storage(json)
         st.success("Data migrated successfully.")
+
+with tabs[2]:
+    st.write('### Channel Details')
+    channel_df = fetch_channels()
+    st.dataframe(channel_df)
+
+    st.write('### Video Details')
+    video_df = fetch_videos()
+    st.dataframe(video_df)
+
+    st.write('### Comment Details')
+    comment_df = fetch_comments()
+    st.dataframe(comment_df)
