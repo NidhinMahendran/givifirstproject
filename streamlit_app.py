@@ -182,11 +182,13 @@ with tabs[1]:
     submit = st.button('Migrate to SQL')
     if submit:
         st.write("Migrating data to SQL...")
-        for response in st.session_state.json_responses:
-            channel_id = list(response.keys())[0]
-            json = response[channel_id]
-            cache_storage(json)
-        st.success("Data migrated successfully.")
+        st.write(st.session_state.json_responses)
+        
+        # for response in st.session_state.json_responses:
+        #     channel_id = list(response.keys())[0]
+        #     json = response[channel_id]
+            # cache_storage(json)
+        # st.success("Data migrated successfully.")
 
 # with tabs[2]:
 #     st.write('### Channel Details')
